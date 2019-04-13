@@ -1,7 +1,7 @@
 <template>
    <v-card
     class="mx-auto"
-    max-width="500"
+    max-width="700"
   >
     <v-sheet class="pa-3 primary lighten-2">
       <v-text-field
@@ -34,6 +34,12 @@
             v-text="`mdi-${item.id === 1 ? 'home-variant' : 'folder-network'}`"
           ></v-icon>
         </template>
+        <template v-slot:label="{ item }">
+          {{item.name | trim}}
+        </template>
+        <template slot="append" slot-scope="{ item }">
+            {{item.id}}
+        </template>
       </v-treeview>
     </v-card-text>
   </v-card>
@@ -55,14 +61,25 @@
           ? (item, search, textKey) => item[textKey].indexOf(search) > -1 : undefined;
       }
     },
-    created() {
-      this.items.push(
-        {
-          id: 1,
-          name: 'Industries',
-          children: IndustriesTree.children,
+    filters: {
+      trim: (name) => {
+        const cutOff = 70;
+        if (name.length > cutOff) {
+          return name.slice(0, cutOff);
+        } else {
+          return name;
         }
-      )
+      }
+    },
+    created() {
+      let i;
+      for (i = 0; i < IndustriesTree.children.length; i++) {
+        this.items.push({
+          id: IndustriesTree.children[i].id,
+          name: IndustriesTree.children[i].name,
+          children: IndustriesTree.children[i].children,
+        })
+      }
     }
   }
 </script>

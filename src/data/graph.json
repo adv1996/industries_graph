@@ -1369,13 +1369,7 @@
           ],
           "id": "316",
           "name": "Leather and Allied Product Manufacturing"
-        }
-      ],
-      "id": "31",
-      "name": "Manufacturing"
-    },
-    {
-      "children": [
+        },
         {
           "children": [
             {
@@ -2039,13 +2033,7 @@
           ],
           "id": "327",
           "name": "Nonmetallic Mineral Product Manufacturing"
-        }
-      ],
-      "id": "32",
-      "name": "Manufacturing"
-    },
-    {
-      "children": [
+        },
         {
           "children": [
             {
@@ -3223,7 +3211,7 @@
           "name": "Miscellaneous Manufacturing"
         }
       ],
-      "id": "33",
+      "id": "31",
       "name": "Manufacturing"
     },
     {
@@ -3945,13 +3933,7 @@
           ],
           "id": "448",
           "name": "Clothing and Clothing Accessories Stores"
-        }
-      ],
-      "id": "44",
-      "name": "Retail Trade"
-    },
-    {
-      "children": [
+        },
         {
           "children": [
             {
@@ -4107,7 +4089,7 @@
           "name": "Nonstore Retailers"
         }
       ],
-      "id": "45",
+      "id": "44",
       "name": "Retail Trade"
     },
     {
@@ -4455,13 +4437,7 @@
           ],
           "id": "488",
           "name": "Support Activities for Transportation"
-        }
-      ],
-      "id": "48",
-      "name": "Transportation and Warehousing"
-    },
-    {
-      "children": [
+        },
         {
           "id": "491",
           "name": "Postal Service"
@@ -4503,7 +4479,7 @@
           "name": "Warehousing and Storage"
         }
       ],
-      "id": "49",
+      "id": "48",
       "name": "Transportation and Warehousing"
     },
     {
