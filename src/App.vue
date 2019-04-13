@@ -2,13 +2,12 @@
   <v-app>
     <v-toolbar app>
       <v-toolbar-title class="headline text-uppercase">
-        <span>Vuetify</span>
-        <span class="font-weight-light">MATERIAL DESIGN</span>
+        <span>NAICS Visualization</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn
         flat
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
+        href="https://github.com/adv1996/industries_graph"
         target="_blank"
       >
         <span class="mr-2">Latest Release</span>
@@ -16,18 +15,18 @@
     </v-toolbar>
 
     <v-content>
-      <HelloWorld/>
+      <HierarchicalTreeView/>
     </v-content>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld'
+import HierarchicalTreeView from './components/HierarchicalTreeView'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    HierarchicalTreeView,
   },
   data () {
     return {
