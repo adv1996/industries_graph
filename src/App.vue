@@ -15,18 +15,21 @@
     </v-toolbar>
 
     <v-content>
-      <HierarchicalTreeView/>
+      <Map/>
+      <!-- <HierarchicalTreeView/> -->
     </v-content>
   </v-app>
 </template>
 
 <script>
 import HierarchicalTreeView from './components/HierarchicalTreeView'
+import Map from './components/Map'
 
 export default {
   name: 'App',
   components: {
     HierarchicalTreeView,
+    Map
   },
   data () {
     return {
