@@ -22,13 +22,11 @@
 </template>
 
 <script>
-import HierarchicalTreeView from './components/HierarchicalTreeView'
 import Map from './components/Map'
 
 export default {
   name: 'App',
   components: {
-    HierarchicalTreeView,
     Map
   },
   data () {
