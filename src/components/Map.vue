@@ -1,23 +1,8 @@
 <template>
-  <v-container>
-    <v-card xs12>
-      <v-chip
-        v-for="c in categories" :key="c.id"
-        v-on:click="changeCategory(c)"
-        :color="c.status ? selected : notSelected"
-      >
-        <strong>{{ c.name }}</strong>&nbsp;
-      </v-chip>
-    </v-card>
-    <v-card xs12 md6>
-      <v-card-title primary-title>
-        <div>
-          <h3 class="headline mb-0">{{ first }}</h3>
-        </div>
-      </v-card-title>
-      <svg id="mapid"/>
-    </v-card>
-  </v-container>
+  <div>
+    <!-- <Legend/> -->
+    <svg :id="category"/>
+  </div>
 </template>
 
 <script>
@@ -25,132 +10,82 @@
   import _ from 'lodash';
   import * as d3 from 'd3';
   import {feature, mesh} from 'topojson';
-  import IndustryData from '../data/Industry.json';
-  import Population from '../data/population.json';
+  import IndustryData from '../data/naics.json';
+  import MapData from '../data/us-10m.v1.json';
 
   export default {
+    props: ['data', 'category'],
     data() {
       return {
-        map: null,
-        tileLayer: null,
-        layers: [],
-        width: 800,
-        height: 400,
-        jobs: [],
-        dataMap: null,
-        max: 0,
-        min: 0,
-        popMap: null,
-        categories: [],
-        first: 'Agriculture, Forestry, Fishing and Hunting',
+        width: null,
+        height: null,
         color: null,
-        selected: 'green',
-        notSelected: 'grey'
+        dataMap: null
       }
     },
     mounted() {
-      this.setPopulation()
-      this.setData(this.first)
+      this.setDimensions()
+      this.setData()
       this.initMap()
     },
     methods: {
-      changeCategory(c) {
-        this.setData(c.name)
-        this.first = c.name
-        this.categories[c.index].status = true;
-        this.color = d3.scaleQuantize([this.min, this.max], ['#e0ecf4','#bfd3e6','#9ebcda','#8c96c6','#8c6bb1','#88419d','#810f7c','#4d004b'])
-        d3.selectAll('.state-areas')
-          .attr('fill', (d) => {
-            if (this.dataMap.get(d.id)) {
-              return this.color(this.dataMap.get(d.id))
-            } else {
-              return 'gray'
-            }
-          })
+      setDimensions() {
+        this.width = this.$el.offsetWidth
+        this.height = 350
       },
-      setPopulation() {
-        this.popMap = new Map();
-        let population = Population.states;
-        population.forEach((p) => {
-          this.popMap.set(p[0], p[1])
-        })
-      },
-      setData(c) {
-        this.dataMap = new Map();
-        let rows = IndustryData.rows;
-        rows = _.groupBy(rows, (r) => {return r[3]})
-        this.categories = []
-        Object.keys(rows).forEach((status, i) => {
-          this.categories.push({
-            name: status,
-            status: false,
-            index: i,
-          })
-        })
-        rows = rows[c]
-        let ex = []
-        let density;
-        let pop;
-        for (let i = 0; i < rows.length; i++) {
-          if (this.popMap.get(rows[i][1])) {
-            pop = this.popMap.get(rows[i][1]).replace(/,/g, '')
-            density = (parseFloat(rows[i][5]) / parseFloat(pop)) * 100
-            this.dataMap.set(rows[i][0], density)
-            ex.push(density)
+      setData() {
+        let density = []
+        this.dataMap = _.keyBy(_.map(this.data, (state) => {
+          let population = parseFloat(state[21].replace(/,/g, ''))
+          let jobs = parseFloat(state[5])
+          let value = (jobs / population) * 100
+          density.push(value)
+          return {
+            id: state[0],
+            state: state[1],
+            population: population,
+            jobs: jobs,
+            density: value,
           }
-        }
-        let maxMin = d3.extent(ex)
+        }), 'id')
+        let maxMin = d3.extent(density)
         this.min = maxMin[0]
         this.max = maxMin[1]
       },
       initMap() {
-        // let clearSvg = d3.select('#mapid')
-        // clearSvg.selectAll("*").remove();
-        this.categories[0].status = true;
         this.color = d3.scaleQuantize([this.min, this.max], ['#e0ecf4','#bfd3e6','#9ebcda','#8c96c6','#8c6bb1','#88419d','#810f7c','#4d004b'])
-        let svg = d3.select('#mapid')
+        let svg = d3.select('#' + this.category)
           .attr('width', this.width)
           .attr('height', this.height)
           .attr("viewBox", "0 0 " + this.width + " " + this.height )
           .attr("preserveAspectRatio", "xMinYMin");
-        // let path = d3.geoPath();
-        const url = "https://d3js.org/us-10m.v1.json"
         
-        d3.json(url).then((data) => {
-          let featureCollection = feature(data, data.objects.states);
-          let projection = d3.geoIdentity()
-            .fitExtent([[50,50],[this.width-50,this.height-50]], featureCollection)
+        const g = svg.append('g')
+          .attr("transform", "translate(" + 0 + "," + -40 + ")")
+        
+        let featureCollection = feature(MapData, MapData.objects.states);
+        let projection = d3.geoIdentity()
+          .fitExtent([[25, 25],[this.width - 25,this.height - 25]], featureCollection)
 
-          let path = d3.geoPath().projection(projection)
-          svg.append('g')
-            .attr('class', 'states')
-            .selectAll('path')
-            .data(feature(data, data.objects.states).features)
-            .enter().append('path')
-              .attr('d', path)
-              .attr('fill', (d) => {
-                if (this.dataMap.get(d.id)) {
-                  return this.color(this.dataMap.get(d.id))
-                } else {
-                  console.log(d.id)
-                  return 'gray'
-                }
-              })
-              .style('opacity', 0.75)
-              .attr('class', 'state-areas')
-              .on('mouseover', function(d,i) {
-                d3.select(this)
-                  .style('opacity', 1)
-              })
-              .on('mouseout', function(d, i) {
-                d3.select(this)
-                  .style('opacity', 0.75)
-              })
+        let path = d3.geoPath().projection(projection)
+        g.append('g')
+          .attr('class', 'states')
+          .selectAll('path')
+          .data(feature(MapData, MapData.objects.states).features)
+          .enter().append('path')
+            .attr('d', path)
+            .attr('fill', (d) => {
+              if (this.dataMap[d.id]) {
+                return this.color(this.dataMap[d.id].density)
+              } else {
+                return 'white'
+              }
+            })
+            .attr('class', 'state-areas')
 
-          svg.append('path')
-            .attr('class', 'state-borders')
-            .attr('d', path(mesh(data, data.objects.states, (a,b) => {return a != b})))
-        })
+        g.append('path')
+          .attr('class', 'state-borders')
+          .attr('d', path(mesh(MapData, MapData.objects.states, (a,b) => {return a != b})))
       }
     }
   }
