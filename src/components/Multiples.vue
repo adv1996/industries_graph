@@ -9,11 +9,16 @@
         d-flex
       >
         <v-card
-          color="blue lighten-4"
+          color="white"
           tile
-          height="350"
+          height="400"
         >
-          <v-card-text>{{ rows[category][0][3] }}</v-card-text>
+          <v-card-title primary-title>
+            <div>
+              <h3 v-if="rows[category][0][3].length < 45">{{ rows[category][0][3].replace('and', '&') }}</h3>
+              <h3 v-else>{{ rows[category][0][3].slice(0, 45).replace('and', '&') + '...' }}</h3>
+            </div>
+          </v-card-title>
           <Map :data="rows[category]" :category="category"/>
         </v-card>
       </v-flex>
@@ -45,7 +50,7 @@
           return r[3][0] + r[2]
         })
         this.categories = Object.keys(this.rows)
-      }
+      },
     }
   }
 </script>
