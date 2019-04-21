@@ -56,7 +56,7 @@
 <script>
   import _ from 'lodash';
   import * as d3 from 'd3';
-  import IndustryData from '../data/naics_all.json';
+  import IndustryData from '../data/naics-2018.json';
   import MapViz from './Map.vue';
   
   export default {
