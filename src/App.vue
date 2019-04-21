@@ -1,36 +1,40 @@
 <template>
   <v-app>
-    <v-toolbar app>
+    <v-toolbar app color="light-blue">
       <v-toolbar-title class="headline text-uppercase">
         <span>NAICS Viz</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn
-        flat
-        href="https://github.com/adv1996/industries_graph"
-        target="_blank"
-      >
-        <span class="mr-2">Latest Release</span>
-      </v-btn>
+      <a :href="github" target="_blank"> 
+        <v-btn
+          color="black"
+          flat
+        >
+          <font-awesome-icon :icon="['fab', 'github']" size="lg"/>
+        </v-btn>
+      </a>
     </v-toolbar>
 
     <v-content>
       <Multiples/>
+      <HierarchicalTreeView/>
     </v-content>
   </v-app>
 </template>
 
 <script>
-// import Map from './components/Map'
 import Multiples from './components/Multiples'
+import HierarchicalTreeView from './components/HierarchicalTreeView'
+
 export default {
   name: 'App',
   components: {
-    Multiples
+    Multiples,
+    HierarchicalTreeView
   },
   data () {
     return {
-      //
+      github: 'https://github.com/adv1996/industries_graph',
     }
   }
 }

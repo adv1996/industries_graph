@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Legend v-if="width" :data="density" :category="legendName" :colors="colors" :extent="extent" :jobs="getJobs(data)" :width="width"/>
+    <Legend v-if="width" :colorScale="color" :category="legendName" :colors="colors" :extent="extent" :jobs="getJobs(data)" :width="width"/>
     <svg :id="category"/>
     <BoxPlot v-if="width" :category="boxName" :data="data" :width="width"/>
   </div>
@@ -11,7 +11,6 @@
   import _ from 'lodash';
   import * as d3 from 'd3';
   import {feature, mesh} from 'topojson';
-  import IndustryData from '../data/naics.json';
   import MapData from '../data/us-10m.v1.json';
   import Legend from './Legend';
   import BoxPlot from './BoxPlot';
@@ -31,6 +30,7 @@
         density: null,
         colors: ['#bfd3e6','#9ebcda','#8c96c6','#8c6bb1','#88419d','#810f7c','#4d004b'],
         extent: [],
+        color: null
       }
     },
     computed: {
@@ -45,17 +45,10 @@
       this.setData()
     },
     mounted() {
-      this.setTooltip()
       this.setDimensions()
       this.initMap()
     },
     methods: {
-      setTooltip() {
-        let tooltip = d3.select('body')
-          .append('div')
-          .attr('class', 'tooltip')	
-          .style('opacity', 0)
-      },
       getJobs(jobs) {
         return _.sum(_.map(jobs, (j) => {
           if (j[5]) {
@@ -66,16 +59,19 @@
       setDimensions() {
         this.width = this.$el.offsetWidth
         this.height = 260
-        // d3.select('#' + this.category + 'Box')
-        //   .attr('width', this.width)
       },
       setData() {
         this.density = []
+        let test = []
         this.dataMap = _.keyBy(_.map(this.data, (state) => {
           let population = parseFloat(state[21].replace(/,/g, ''))
           let jobs = parseFloat(state[5])
           let value = (jobs / population) * 100
-          this.density.push(value)
+
+          // District of Columbia heavily skews data
+          if (state[1] !== 'District of Columbia') {
+            this.density.push(value)
+          }
           return {
             id: state[0],
             state: state[1],
@@ -106,6 +102,7 @@
 
         let path = d3.geoPath().projection(projection)
         let tooltip = d3.select('.tooltip')
+        let that = this;
         g.append('g')
           .attr('class', 'states')
           .selectAll('path')
@@ -119,18 +116,32 @@
                 return 'white'
               }
             })
-            .attr('class', 'state-areas')
-            .on('mouseover', (d) => {
-              tooltip
-                .style("left", (d3.event.pageX + 10) + "px")	
-                .style("top", (d3.event.pageY - 10) + "px")
-                .style('opacity', 1)
-                .style('height', 50)
-                .html(
-                  this.dataMap[d.id].state + '<br/>' +
-                  this.dataMap[d.id].jobs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' Jobs' + '<br/>' +
-                  '$' + this.dataMap[d.id].median.toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                )
+            .attr('class', 'state-areas-' + this.category)
+            .on('mouseover', function(d) {
+              try {
+                let offsetTooltipX = d3.event.pageX - 20
+                let offsetTooltipY = d3.event.pageY - 30
+                let barrier = d3.mouse(this)
+                if (barrier[0] > that.width - 90) {
+                  offsetTooltipX = d3.event.pageX - 90
+                  offsetTooltipY = d3.event.pageY - 50
+                }
+                if (that.dataMap[d.id].jobs) {
+                  tooltip
+                    .style("left", offsetTooltipX + "px")	
+                    .style("top", offsetTooltipY + "px")
+                    .style('opacity', 1)
+                    .style('height', 50)
+                    .html(
+                      that.dataMap[d.id].state + '<br/>' +
+                      that.dataMap[d.id].jobs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' Jobs' + '<br/>' +
+                      '$' + that.dataMap[d.id].median.toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    )
+                }
+              }
+              catch(err) {
+                // handle error on undefined state (possibly Delaware)
+              }
             })
             .on('mouseout', () => {
               tooltip
@@ -138,33 +149,26 @@
             })
 
         g.append('path')
-          .attr('class', 'state-borders')
+          .attr('class', 'state-borders' + this.category)
           .attr('d', path(mesh(MapData, MapData.objects.states, (a,b) => {return a != b})))
+          .attr('fill', 'none')
+          .attr('stroke', '#fff')
+          .style('stroke-width', '0.5px')
+          .style('stroke-linecap', 'round')
+          .style('stroke-linejoin', 'round')
+          .style('pointer-events', 'none')
       }
     }
   }
 </script>
 
 <style>
-div.tooltip {	
-  position: absolute;
-  text-align: center;
-  width: 90px;			
-  padding: 2px;				
-  font-size: 12px;		
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
-  color: black;
-  background:white;	
-  border: 0px;		
-  border-radius: 2px;			
-  pointer-events: none;			
-}
-.state-borders {
+/* .state-borders {
   fill: none;
   stroke: #fff;
   stroke-width: 0.5px;
   stroke-linejoin: round;
   stroke-linecap: round;
   pointer-events: none;
-}
+} */
 </style>

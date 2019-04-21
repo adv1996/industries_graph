@@ -11,21 +11,14 @@
     data() {
       return {
         boxValues: [],
-        height: 40,
+        height: 50,
       }
     },
     mounted() {
-      this.setTooltip()
       this.setData()
       this.initBoxPlot()
     },
     methods: {
-      setTooltip() {
-        d3.select('body')
-          .append('div')
-          .attr('class', 'boxTooltip')	
-          .style('opacity', 0)
-      },
       setData() {
         for (let k = 0; k < 5; k++) {
           this.boxValues.push({
@@ -63,34 +56,45 @@
           .range([0, center])
 
         g.append('rect')
+          .attr('class', 'rect' + this.category)
           .attr('x', xScale(sums[1]))
           .attr('y', 5)
           .attr('height', 10)
-          .attr('width', xScale(sums[3]) - xScale(sums[1]))
+          .attr('width', 0)
           .attr('fill', '#810f7c')
           .style('opacity', 0.6)
+          .transition()
+          .delay(1250)
+          .duration(1500)
+          .attr("width", xScale(sums[3]) - xScale(sums[1]))
 
         g.append('line')
+          .attr('class', 'boxLine' + this.category)
           .attr('x1', xScale(sums[0]))
           .attr('y1', 10)
-          .attr('x2', xScale(sums[4]))
+          .attr('x2', 0)
           .attr('y2', 10)
           .attr('stroke', 'black')
+          .transition()
+          .delay(1000)
+          .duration(1500)
+          .attr('x2', xScale(sums[4]))
 
         g.append('g')
           .attr('class', 'circles')
           .selectAll('nodes')
           .data(sums)
           .enter().append('circle')
+          .attr('class', 'circles' + this.category)
           .attr('cx', (d) => {
             return xScale(d)
           })
           .attr('cy', 10)
-          .attr('r', 2)
+          .attr('r', 0)
           .on('mouseover', (d) => {
             boxTooltip
-              .style("left", (d3.event.pageX + 10) + "px")	
-              .style("top", (d3.event.pageY - 10) + "px")
+              .style("left", (d3.event.pageX - 25) + "px")	
+              .style("top", (d3.event.pageY - 25) + "px")
               .style('opacity', 1)
               .style('height', 50)
               .html(
@@ -101,13 +105,37 @@
             boxTooltip
               .style('opacity', 0)
           })
+          .transition()
+          .delay(1000)
+          .duration(2000)
+          .attr('r', 2)
         
-        g.selectAll('bLabels')
+        g.append('g')
+          .attr('class', 'labels')
+          .selectAll('bLabels')
           .data([sums[0], sums[2], sums[4]])
           .enter().append('text')
+          .attr('class', 'bLabels' + this.category)
           .attr('x', (d) => {return xScale(d) - 15})
           .attr('y', 27)
           .text((d) => {return (d / 1000).toFixed(0) + 'K'})
+          .style('opacity', 0)
+          .transition()
+          .delay(1500)
+          .duration(2000)
+          .style('opacity', 1)
+      
+        g.append('text')
+          .attr('class', 'boxPlotLabel' + this.category)
+          .attr('x', 20)
+          .attr('y', 42)
+          .text('Average Median Salary Across US')
+          .style('opacity', 0)
+          .style('font-size','10px')
+          .transition()
+          .delay(1500)
+          .duration(2000)
+          .style('opacity', 1)
       
       }
     }
@@ -115,17 +143,5 @@
 </script>
 
 <style>
-div.boxTooltip {	
-  position: absolute;
-  text-align: center;
-  width: 60px;			
-  padding: 2px;				
-  font-size: 12px;		
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
-  color: black;
-  background:white;	
-  border: 0px;		
-  border-radius: 2px;			
-  pointer-events: none;			
-}
+
 </style>

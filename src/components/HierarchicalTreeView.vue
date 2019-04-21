@@ -63,7 +63,7 @@
     },
     filters: {
       trim: (name) => {
-        const cutOff = 65;
+        const cutOff = 38;
         if (name.length > cutOff) {
           return name.slice(0, cutOff);
         } else {
