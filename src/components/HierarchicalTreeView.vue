@@ -6,7 +6,7 @@
     <v-sheet class="pa-3 primary lighten-2">
       <v-text-field
         v-model="search"
-        label="Search Company Directory"
+        label="Search Industry Directory by Name"
         dark
         flat
         solo-inverted
@@ -18,7 +18,7 @@
         v-model="caseSensitive"
         dark
         hide-details
-        label="Case sensitive search"
+        label="Case sensitive search (NAICS code on the right)"
       ></v-checkbox>
     </v-sheet>
     <v-card-text>

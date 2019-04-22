@@ -127,9 +127,9 @@
       
         g.append('text')
           .attr('class', 'boxPlotLabel' + this.category)
-          .attr('x', 20)
+          .attr('x', 0 )
           .attr('y', 42)
-          .text('Average Median Salary Across US')
+          .text('Average Percentile Wage Salary (10/25/50/75/90)')
           .style('opacity', 0)
           .style('font-size','10px')
           .transition()
